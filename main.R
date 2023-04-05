@@ -6,6 +6,9 @@ if (!require("plotly")) install.packages("plotly")
 if (!require("shinyWidgets")) install.packages("shinyWidgets")
 if (!require("shiny.fluent")) install.packages("shiny.fluent")
 if (!require("tidyverse")) install.packages("tidyverse")
+if (!require("shinythemes")) install.packages("shinythemes")
+if (!require("shinyjs")) install.packages("shinyjs")
+if (!require("leaflet")) install.packages("leaflet")
 
 library(tidyverse)
 library(shiny.fluent)
@@ -13,24 +16,30 @@ library(shiny)
 library(DT)
 library(plotly)
 library(shinyWidgets)
+library(shinythemes)
+library(shinyjs)
+library(leaflet)
+
+sklepy_xkom <- read.csv("sklepy_xkom.csv", stringsAsFactors = FALSE)
 
 # Definicja UI
-ui <- fluidPage(
+ui <- fluidPage( theme = shinytheme("superhero"),
   
   tags$style(
     type = "text/css", "body { 
-    background-color: #071E22;
+    background-color: #61718A;
     font-family: font-family: 'Barlow', Sans-Serif;
-    color: #F4C095;
+    color: white;
     }"
   ),
   
   tags$head(
-    tags$link(rel = "stlesheet", type = "text/css", href = "site.css"),
+    tags$link(rel = "stylesheet", type = "text/css", href = "site.css"),
+    
     
     HTML('<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@200;300;500&display=swap" rel="stylesheet">')
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@200;300;500&display=swap" rel="stylesheet">')
     
   ),
   
@@ -41,13 +50,14 @@ ui <- fluidPage(
               theme = bslib::bs_theme(version = 5, primary = "#071E22"),
               
               titlePanel(
-                h1("KREATOR BUDOWY KOMPUTERA",
-                   style = "font-family: 'Barlow', sans-serif; font-weight: 350; text-align: center; padding: 20px;"),
-                
-                div(tags$img(src = "logo.png", height = "200px", width = "300px", deleteFile = FALSE), style = "text-align: center")
+                h1("PATRYK FRANKOWSKI", tags$img(src = "logo.png", heigh = 250, width = 250), "MIKOŁAJ KONIECZNY",
+                   style = "font-family: 'Barlow', sans-serif; font-weight: 350; text-align: center; padding: 20px;")
               ),
+              
+              tabsetPanel(
+                tabPanel("Panel wyboru",
               sidebarLayout( 
-                sidebarPanel( style = "background-color: #1D7874;",
+                sidebarPanel( style = "background-color: #8C97A9;",
                               selectInput("category", "Wybierz kategorię podzespołów:",
                                           choices = c("Obudowa", "Procesor", "Karta graficzna", "Płyta główna", "Pamięć RAM", "Zasilacz", "Dysk SSD", "Dysk twardy", "Chłodzenie"),
                                           selected = "Obudowa"),
@@ -61,14 +71,14 @@ ui <- fluidPage(
                               conditionalPanel(
                                 condition = "input.category === 'Procesor'",
                                 selectInput("processor", "Wybierz procesor:",
-                                            choices = c("Intel i7", "Intel i9", "AMD Ryzen 7", "AMD Ryzen 9"),
-                                            selected = "Intel i7")
+                                            choices = c("Intel Core i7-9700K", "Intel Core i9-13900K", "AMD Ryzen 7 7700X", "AMD Ryzen 9 7900X"),
+                                            selected = "Intel Core i7-9700K")
                               ),
                               conditionalPanel(
                                 condition = "input.category === 'Karta graficzna'",
                                 selectInput("gpu", "Wybierz kartę graficzną:",
-                                            choices = c("Nvidia RTX 3060", "Nvidia RTX 3070", "AMD Radeon RX 6700 XT"),
-                                            selected = "Nvidia RTX 3060")
+                                            choices = c("Gigabyte GeForce RTX 3060 EAGLE OC", "Zotac GeForce RTX 3070 Gaming Twin Edge 8GB GDDR6", "XFX Radeon RX 6700 CORE Gaming SWFT 309 10GB GDDR6"),
+                                            selected = "Gigabyte GeForce RTX 3060 EAGLE OC")
                               ),
                               conditionalPanel(
                                 condition = "input.category === 'Płyta główna'",
@@ -108,25 +118,74 @@ ui <- fluidPage(
                               ),
                               
                               numericInput("quantity", "Ilość:", value = 1, min = 1, max = 10),
-                              actionButton("add_button", "Dodaj do koszyka", style = "color: #EE2E31; text-black"),
-                              actionButton("clear_button", "Wyczyść koszyk", style = "color: #EE2E31; text-black"),
+                              actionButton("add_button", "Dodaj do koszyka", style = "color: white;"),
+                              actionButton("clear_button", "Wyczyść koszyk", style = "color: white;"),
                               hr(),
                               h4("Cena całkowita:"),
                               verbatimTextOutput("cart_text"),
-                              tags$img(src = 'tlo.png', heigh = 900, width = 900)
                 ),
                 mainPanel(
                   DTOutput("cart_table"),
                   downloadButton("download_data", "Pobierz koszyk", style="position: relative; left: calc(45%);"),
                   
+  
+                  sidebarLayout(
+                    sidebarPanel(
+                     
+                      h4("Wizualizacja komputera:"),
+                      hr(),
+                      actionButton("hide_btn", "Usuń"),
+                      hr(),
+                      imageOutput("image"),
+                      
+                      style = "font-family: 'Barlow', sans-serif; font-weight: 350; position: relative; left: calc(65%); padding: 20px;",
+                    ),
+                    mainPanel(
+                      #testtesttesttest
+                    )
+                  )
+                  
                 )
               )
           )
       )
+   )
   )
+  ),
+          tabPanel("Mapa punktów x-kom",
+                   h2("Lokalizacje sklepów X-kom w Polsce"),
+                   leafletOutput("map", width = "600px", height = "600px"),
+                        style = "position: relative; left: calc(20%); padding: 20px;",
+                   
+                   )
 )
-# Definicja server
+# Definicja servera
 server <- function(input, output, session) {
+  
+  # Funkcja usuwająca obraz po kliknięciu przycisku "Usuń"
+  observeEvent(input$hide_btn, {
+    output$image <- NULL
+  })
+  
+  # Utworzenie mapy
+  output$map <- renderLeaflet({
+    leaflet(sklepy_xkom) %>%
+      addTiles() %>%
+      setView(lat = 52.2297, lng = 21.0122, zoom = 6) # Ustawienie punktu startowego mapy
+  })
+  
+  # Dodanie znaczników na mapie dla każdego sklepu X-kom
+  observe({
+    leafletProxy("map", data = sklepy_xkom) %>%
+      clearMarkers() %>%
+      addMarkers(
+        lng = ~longitude,
+        lat = ~latitude,
+        popup = ~paste("<b>", nazwa, "</b><br/>", adres, "<br/>", kod_pocztowy, " ", miasto, sep = ""),
+        label = ~nazwa
+      )
+  })
+  
   # Inicjalizacja danych koszyka
   cart <- reactiveValues(
     products = data.frame(
@@ -174,47 +233,54 @@ server <- function(input, output, session) {
     cart$total_price <- 0
   }
   
-  #Obserwator dodawania produktu do koszyka
+  #Dodawanie produktów do koszyka
   observeEvent(input$add_button, {
     category <- input$category
     quantity <- input$quantity
+    
     
     if (category == "Obudowa") {
       obudowa <- input$obudowa
       if (obudowa == "Krux Leda") {
         price <- 350
+        output$image <- renderImage({
+        file <- "grafiki/Obudowa/KruxLeda.png"
+        list(src = file, alt = "Krux Leda")},deleteFile = FALSE)
       } else if (obudowa == "Silver Monkey X Crate") {
         price <- 499
       } else if (obudowa == "Corsair 4000D Airflow") {
         price <- 479
-      } else {
+      } else if (obudowa == "Fractal Design North Chalk White TG Clear") {
         price <- 669
       }
       add_to_cart(category, obudowa, price, quantity)
-    } 
+    }
     
     else if (category == "Procesor") {
       processor <- input$processor
-      if (processor == "Intel i7") {
+      if (processor == "Intel Core i7-9700K") {
         price <- 1500
-      } else if (processor == "Intel i9") {
+      } else if (processor == "Intel Core i9-13900K") {
         price <- 2500
-      } else if (processor == "AMD Ryzen 7") {
-        price <- 1800
-      } else {
-        price <- 2800
+      } else if (processor == "AMD Ryzen 7 7700X") {
+        price <- 1900
+      } else if (processor == "AMD Ryzen 9 7900X") {
+        price <- 2500
+        output$image <- renderImage({
+          file <- "grafiki/Procesor/procesor_przyklad.png"
+          list(src = file, alt = "przyklad")},deleteFile = FALSE)
       }
       add_to_cart(category, processor, price, quantity)
     } 
     
     else if(category == "Karta graficzna") {
       gpu <- input$gpu
-      if (gpu == "Nvidia RTX 3060") {
-        price <- 2000
-      } else if (gpu == "Nvidia RTX 3070") {
-        price <- 3000
-      } else {
+      if (gpu == "Gigabyte GeForce RTX 3060 EAGLE OC") {
+        price <- 1800
+      } else if (gpu == "Zotac GeForce RTX 3070 Gaming Twin Edge 8GB GDDR6") {
         price <- 2500
+      } else if (gpu == "XFX Radeon RX 6700 CORE Gaming SWFT 309 10GB GDDR6") {
+        price <- 1900
       }
       add_to_cart(category, gpu, price, quantity)
     }
@@ -225,7 +291,7 @@ server <- function(input, output, session) {
         price <- 600
       } else if (motherboard == "Gigabyte B550 AORUS ELITE") {
         price <- 900
-      } else {
+      } else if (motherboard == "MSI MPG B550 GAMING CARBON WIFI") {
         price <- 1100
       }
       add_to_cart(category, motherboard, price, quantity)
@@ -239,10 +305,60 @@ server <- function(input, output, session) {
         price <- 399
       } else if (RAM == "GOODRAM 16GB (2x8GB) 3600MHz CL18 IRDM RGB") {
         price <- 249
-      } else {
-        price <- 1259
+      } else if (RAM == "Kingston FURY 64GB (2x32GB) 5600MHz CL40 Beast Black") {
+        price <- 1100
       }
       add_to_cart(category, RAM, price, quantity)
+    }
+    
+    else if(category == "Zasilacz") {
+      zasilacz <- input$zasilacz
+      if (zasilacz == "SilentiumPC Elementum E2 550W 80 Plus") {
+        price <- 199
+      } else if (zasilacz == "be quiet! Pure Power 11 FM 650W 80 Plus Gold") {
+        price <- 500
+      } else if (zasilacz == "ENDORFY Supremo FM5 850W 80 Plus Gold") {
+        price <- 600
+      }
+      add_to_cart(category, zasilacz, price, quantity)
+    }
+    
+    else if(category == "Dysk SSD") {
+      SSD <- input$SSD
+      if (SSD == "Lexar 1TB M.2 PCIe Gen4 NVMe NM710") {
+        price <- 299
+      } else if (SSD == "Samsung 2TB M.2 PCIe Gen4 NVMe 980 PRO") {
+        price <- 859
+      } else if (SSD == "GOODRAM 256GB 2,5' SATA SSD CX400") {
+        price <- 79
+      }
+      add_to_cart(category, SSD, price, quantity)
+    }
+    
+    else if(category == "Dysk HDD") {
+      HDD <- input$HDD
+      if (HDD == "Seagate BARRACUDA 2TB 7200obr. 256MB") {
+        price <- 245
+      } else if (HDD == "Toshiba P300 1TB 7200obr. 64MB OEM") {
+        price <- 189
+      } else if (HDD == "Seagate IRONWOLF 4TB 5400obr. 256MB") {
+        price <- 469
+      }
+      add_to_cart(category, HDD, price, quantity)
+    }
+    
+    else if(category == "Chłodzenie") {
+      chłodzenie <- input$chłodzenie
+      if (chłodzenie == "be quiet! Pure Loop 2 FX 360 3x120mm") {
+        price <- 729
+      } else if (chłodzenie == "NZXT Kraken x53 2x120mm") {
+        price <- 1139
+      } else if (chłodzenie == "Corsair iCUE H150i ELITE 3x120mm") {
+        price <- 1499
+      } else if (chłodzenie == "SilentiumPC Fortis 5") {
+        price <- 179
+      }
+      add_to_cart(category, chłodzenie, price, quantity)
     }
     
   })
@@ -269,7 +385,7 @@ server <- function(input, output, session) {
       cart$products,
       options = list(paging = FALSE),
       rownames = FALSE,
-      colnames = c("Kategoria", "Produkt", "Cena", "Ilość")
+      colnames = c("Kategoria", "Produkt", "Cena", "Ilość"),
     )
   })
   
@@ -282,6 +398,8 @@ server <- function(input, output, session) {
       write_data_to_file(output$cart_table, file)
     }
   )
+  
+
 }
 
 #Uruchomienie aplikacji
