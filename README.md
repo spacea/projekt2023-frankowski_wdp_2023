@@ -27,7 +27,7 @@ Projekt składa się z plików:
 
 ## Interfejs - opis poszczególnych funkcji
 
-tu se będą zdjęcia z takimi ramkami na interfejsie i strzałki jakieś czy cos z opisami każdego guziora. Ale to jak będzie końcowa wersja projektu v1.0
+![interfejs](https://i.postimg.cc/SK00cQJv/readme.png)
 
 ## Koniec
 
