@@ -9,6 +9,7 @@ if (!require("tidyverse")) install.packages("tidyverse")
 if (!require("shinythemes")) install.packages("shinythemes")
 if (!require("shinyjs")) install.packages("shinyjs")
 if (!require("leaflet")) install.packages("leaflet")
+if (!require("rmarkdown")) install.packages("rmarkdown")
 
 library(tidyverse)
 library(shiny.fluent)
@@ -19,6 +20,7 @@ library(shinyWidgets)
 library(shinythemes)
 library(shinyjs)
 library(leaflet)
+library(rmarkdown)
 
 sklepy_xkom <- read.csv("sklepy_xkom.csv", stringsAsFactors = FALSE)
 
@@ -30,8 +32,8 @@ ui <- fluidPage( theme = shinytheme("superhero"),
                  tags$style(
                    type = "text/css", "body { 
     
-    background: linear-gradient(180deg, #012b35 0%, #00172C 100%), linear-gradient(36deg, #FAFF00 0%, #800000 73%), linear-gradient(110deg, #001D38 30%, #FBFF49 100%), linear-gradient(140deg, #61FF00 0%, #040EFF 72%), linear-gradient(127deg, #FFB800 0%, #02004D 100%), linear-gradient(140deg, #6DCA4C 28%, #CD0000 100%), radial-gradient(100% 100% at 70% 0%, #7A3B00 0%, #49B8A4 100%);
-    background-blend-mode: overlay, color-dodge, difference, difference, difference, color-dodge, normal;
+    background: linear-gradient(45deg, #000850 0%, #000320 100%), radial-gradient(100% 225% at 100% 0%, #FF6928 0%, #000000 100%), linear-gradient(225deg, #FF7A00 0%, #000000 100%), linear-gradient(135deg, #CDFFEB 10%, #CDFFEB 35%, #009F9D 35%, #009F9D 60%, #07456F 60%, #07456F 67%, #0F0A3C 67%, #0F0A3C 100%);
+background-blend-mode: screen, overlay, hard-light, normal;
     
     color: rgba(0,0,0,.8);
     font-family: Poppins,sans-serif;
@@ -99,8 +101,8 @@ ui <- fluidPage( theme = shinytheme("superhero"),
                                                         conditionalPanel(
                                                           condition = "input.category === 'Płyta główna'",
                                                           selectInput("motherboard", "Wybierz płytę główną:",
-                                                                      choices = c("ASUS Prime B450M-A", "Gigabyte B550 AORUS ELITE", "MSI MPG B550 GAMING CARBON WIFI"),
-                                                                      selected = "ASUS Prime B450M-A")
+                                                                      choices = c("Gigabyte Z690 GAMING X DDR4", "Gigabyte B550 AORUS ELITE", "MSI MPG B550 GAMING CARBON WIFI", "ASUS PRIME Z790-A WIFI"),
+                                                                      selected = "Gigabyte Z690 GAMING X DDR4")
                                                         ),
                                                         conditionalPanel(
                                                           condition = "input.category === 'Procesor'",
@@ -111,7 +113,7 @@ ui <- fluidPage( theme = shinytheme("superhero"),
                                                         conditionalPanel(
                                                           condition = "input.category === 'Karta graficzna'",
                                                           selectInput("gpu", "Wybierz kartę graficzną:",
-                                                                      choices = c("Gigabyte GeForce RTX 3060 EAGLE OC", "Zotac GeForce RTX 3070 Gaming Twin Edge 8GB GDDR6", "XFX Radeon RX 6700 CORE Gaming SWFT 309 10GB GDDR6"),
+                                                                      choices = c("Gigabyte GeForce RTX 3060 EAGLE OC", "Zotac GeForce RTX 3070 Gaming Twin Edge 8GB GDDR6", "Sapphire Radeon RX 6600 GAMING Pulse 8GB GDDR6"),
                                                                       selected = "Gigabyte GeForce RTX 3060 EAGLE OC")
                                                         ),
                                                         conditionalPanel(
@@ -170,7 +172,7 @@ background-blend-mode: overlay, color-dodge, difference, difference, difference,
     
     "),
                                                         hr(),
-                                                        h4("Cena całkowita", style = "text-align: center;"),
+                                                        h4("Cena całkowita", style = "text-align: center; font-weight: 400;"),
                                                         textOutput("cart_text"),style = "text-align: center;",
                                                         hr(),
                                                         h4("Wizualizacja komputera"),
@@ -182,10 +184,8 @@ background-blend-mode: overlay, color-dodge, difference, difference, difference,
                                                         h4("Pamięć RAM", style = "text-align: center; background: #fff;box-shadow: 0 16px 80px rgb(17 0 102 / 16%);border-radius: 40px;z-index: 1; padding: 10px;", actionButton("hide_ram", "Usuń", style = "background: #fff;box-shadow: 0 16px 80px rgb(17 0 102 / 16%);border-radius: 40px;z-index: 1; padding: 10px; color: black; position: relative; left: calc(22%); background-image: url('guzik.png'); color: white;")),
                                                         h4("Chłodzenie", style = "text-align: center; background: #fff;box-shadow: 0 16px 80px rgb(17 0 102 / 16%);border-radius: 40px;z-index: 1; padding: 10px;", actionButton("hide_chlodzenie", "Usuń", style = "background: #fff;box-shadow: 0 16px 80px rgb(17 0 102 / 16%);border-radius: 40px;z-index: 1; padding: 10px; color: black; position: relative; left: calc(23%); background-image: url('guzik.png'); color: white;")),
                                                         actionButton("hide_all", "Usuń wszystko", style = "color: black; background: #fff;box-shadow: 0 16px 80px rgb(17 0 102 / 16%);border-radius: 40px;z-index: 1; padding: 10px;"),
-                                                        hr(),
                                                         
                                                         
-                                                        downloadButton("download_data", "Pobierz koszyk", style = "color: black; background: #fff;box-shadow: 0 16px 80px rgb(17 0 102 / 16%);border-radius: 40px;z-index: 1; padding: 10px;"),
                                                         
                                           ),
                                           mainPanel(
@@ -212,25 +212,36 @@ background-blend-mode: overlay, color-dodge, difference, difference, difference,
                                                             
                                                             #Obudowy
                                                     column(1, imageOutput("KruxLeda"), style = "position: absolute; top: 0; left: 0; z-index: 1;"),
-                                                    column(1, imageOutput("silvermonkey"), style = "position: absolute; top: 0; left: 0; z-index: 2;"),
-                                                    column(1, imageOutput("corsair_biala"), style = "position: absolute; top: 0; left: 0; z-index: 2;"),
-                                                    column(1, imageOutput("fractal"), style = "position: absolute; top: 0; left: 0; z-index: 2;"),
+                                                    column(1, imageOutput("silvermonkey"), style = "position: absolute; top: 0; left: 0; z-index: 1;"),
+                                                    column(1, imageOutput("corsair_biala"), style = "position: absolute; top: 0; left: 0; z-index: 1;"),
+                                                    column(1, imageOutput("fractal"), style = "position: absolute; top: 0; left: 0; z-index: 1;"),
                                                     
                                                             #Płyty główne
-                                                    column(1, imageOutput("AsusPrime"), style = "position: absolute; top: 0; left: 0; z-index: 3;"),
+                                                    column(1, imageOutput("gigabyte_z690"), style = "position: absolute; top: 0; left: 0; z-index: 2;"),
+                                                    column(1, imageOutput("gigabyte_aorus"), style = "position: absolute; top: 0; left: 0; z-index: 2;"),
+                                                    column(1, imageOutput("msi_b550"), style = "position: absolute; top: 0; left: 0; z-index: 2;"),
+                                                    column(1, imageOutput("asus_z790"), style = "position: absolute; top: 0; left: 0; z-index: 2;"),
+                                                    
                                                     
                                                             #Procesory
-                                                    column(1, imageOutput("ryzen"), style = "position: absolute; top: 0; left: 0; z-index: 4;"),
-                                                    column(1, imageOutput("intel"), style = "position: absolute; top: 0; left: 0; z-index: 5;"),
+                                                    column(1, imageOutput("ryzen"), style = "position: absolute; top: 0; left: 0; z-index: 3;"),
+                                                    column(1, imageOutput("intel"), style = "position: absolute; top: 0; left: 0; z-index: 3;"),
                                                     
                                                             #Kart graficzne
-                                                    column(1, imageOutput("rtx3060"), style = "position: absolute; top: 0; left: 0; z-index: 6;"),
+                                                    column(1, imageOutput("rtx3060"), style = "position: absolute; top: 0; left: 0; z-index: 4;"),
+                                                    column(1, imageOutput("zotac_3070"), style = "position: absolute; top: 0; left: 0; z-index: 4;"),
+                                                    column(1, imageOutput("radeon_6600"), style = "position: absolute; top: 0; left: 0; z-index: 4;"),
                                                     
                                                             #RAM
-                                                    column(1, imageOutput("goodram"), style = "position: absolute; top: 0; left: 0; z-index: 7;"),
+                                                    column(1, imageOutput("goodram"), style = "position: absolute; top: 0; left: 0; z-index: 5;"),
+                                                    column(1, imageOutput("kingston_fury"), style = "position: absolute; top: 0; left: 0; z-index: 5;"),
+                                                    column(1, imageOutput("pny_32gb"), style = "position: absolute; top: 0; left: 0; z-index: 5;"),
                                                     
                                                             #Chłodzenie
                                                     column(1, imageOutput("bequiet_chlo"), style = "position: absolute; top: 0; left: 0; z-index: 8;"),
+                                                    column(1, imageOutput("fortis5"), style = "position: absolute; top: 0; left: 0; z-index: 8;"),
+                                                    column(1, imageOutput("corsair_icue"), style = "position: absolute; top: 0; left: 0; z-index: 8;"),
+                                                    column(1, imageOutput("nzxt_kraken"), style = "position: absolute; top: 0; left: 0; z-index: 8;"),
                                                     
                                                   ),
                                                 )
@@ -248,7 +259,7 @@ background-blend-mode: overlay, color-dodge, difference, difference, difference,
                  ),
                  tabPanel("Mapa punktów x-kom",
                           h2("Lokalizacje sklepów X-kom w Polsce"),
-                          leafletOutput("map", width = "1590px", height = "600px"),
+                          leafletOutput("map", width = "1810px", height = "600px"),
                           style = " 
     text-align: center;
     color: black;
@@ -271,9 +282,19 @@ server <- function(input, output, session) {
     output$ryzen <- NULL
     output$intel <- NULL
     output$rtx3060 <- NULL
-    output$AsusPrime <- NULL
+    output$gigabyte_aorus <- NULL
     output$goodram <- NULL
     output$bequiet_chlo <- NULL
+    output$gigabyte_z690 <- NULL
+    output$asus_z790 <- NULL
+    output$msi_b550 <- NULL
+    output$zotac_3070 <- NULL
+    output$radeon_6600 <- NULL
+    output$corsair_icue <- NULL
+    output$fortis5 <- NULL
+    output$nzxt_kraken <- NULL
+    output$kingston_fury <- NULL
+    output$pny_32gb <- NULL
   })
   
   # Funkcja usuwająca obraz po kliknięciu przycisku "Usuń"
@@ -299,13 +320,18 @@ server <- function(input, output, session) {
     
     #karty graficzne
     output$rtx3060 <- NULL
+    output$zotac_3070 <- NULL
+    output$radeon_6600 <- NULL
     
   })
   
   observeEvent(input$hide_plytaglowna, {
     
     #płyty główne
-    output$AsusPrime <- NULL
+    output$gigabyte_z690 <- NULL
+    output$gigabyte_aorus <- NULL
+    output$asus_z790 <- NULL
+    output$msi_b550 <- NULL
     
   })
   
@@ -313,13 +339,18 @@ server <- function(input, output, session) {
     
     #ram
     output$goodram <- NULL
+    output$kingston_fury <- NULL
+    output$pny_32gb <- NULL
     
   })
     
   observeEvent(input$hide_chlodzenie, {
     
-    #Chodzenie
+    #Chlodzenie
     output$bequiet_chlo <- NULL
+    output$corsair_icue <- NULL
+    output$fortis5 <- NULL
+    output$nzxt_kraken <- NULL
     
   })
   
@@ -422,15 +453,27 @@ server <- function(input, output, session) {
     }
     else if(category == "Płyta główna") {
       motherboard <- input$motherboard
-      if (motherboard == "ASUS Prime B450M-A") {
-        price <- 600
-        output$AsusPrime <- renderImage({
-          file <- "grafiki/PłytaGlowna/plytaglowna_przyklad.png"
-          list(src = file, alt = "przyklad")},deleteFile = FALSE)
+      if (motherboard == "Gigabyte Z690 GAMING X DDR4") {
+        price <- 1119
+        output$gigabyte_z690 <- renderImage({
+          file <- "grafiki/PłytaGlowna/gigabyte_z690.png"
+          list(src = file, alt = "Gigabyte z690")},deleteFile = FALSE)
       } else if (motherboard == "Gigabyte B550 AORUS ELITE") {
-        price <- 900
+        price <- 649
+        output$gigabyte_aorus <- renderImage({
+          file <- "grafiki/PłytaGlowna/gigabyte_aorus.png"
+          list(src = file, alt = "aorus")},deleteFile = FALSE)
       } else if (motherboard == "MSI MPG B550 GAMING CARBON WIFI") {
         price <- 1100
+        output$msi_b550 <- renderImage({
+          file <- "grafiki/PłytaGlowna/msi_b550.png"
+          list(src = file, alt = "msi b550")},deleteFile = FALSE)
+      }
+      else if (motherboard == "ASUS PRIME Z790-A WIFI") {
+        price <- 1699
+        output$asus_z790 <- renderImage({
+          file <- "grafiki/PłytaGlowna/asus_Z790.png"
+          list(src = file, alt = "asus z790")},deleteFile = FALSE)
       }
       add_to_cart(category, motherboard, price, quantity)
     } 
@@ -467,11 +510,17 @@ server <- function(input, output, session) {
         price <- 1800
         output$rtx3060 <- renderImage({
           file <- "grafiki/KartaGraficzna/RTX-3060.png"
-          list(src = file, alt = "przyklad")},deleteFile = FALSE)
+          list(src = file, alt = "rtx 3060")},deleteFile = FALSE)
       } else if (gpu == "Zotac GeForce RTX 3070 Gaming Twin Edge 8GB GDDR6") {
-        price <- 2500
-      } else if (gpu == "XFX Radeon RX 6700 CORE Gaming SWFT 309 10GB GDDR6") {
-        price <- 1900
+        price <- 3199
+        output$zotac_3070 <- renderImage({
+          file <- "grafiki/KartaGraficzna/zotac_3070.png"
+          list(src = file, alt = "zotac_3070")},deleteFile = FALSE)
+      } else if (gpu == "Sapphire Radeon RX 6600 GAMING Pulse 8GB GDDR6") {
+        price <- 1449
+        output$radeon_6600 <- renderImage({
+          file <- "grafiki/KartaGraficzna/radeon_6600.png"
+          list(src = file, alt = "radeon 6600")},deleteFile = FALSE)
       }
       add_to_cart(category, gpu, price, quantity)
     }
@@ -482,15 +531,24 @@ server <- function(input, output, session) {
       RAM <- input$RAM
       if (RAM == "Kingston FURY 16GB (2x8GB) 3200MHz CL16 Beast Black") {
         price <- 229
+        output$kingston_fury <- renderImage({
+          file <- "grafiki/RAM/kingston_fury.png"
+          list(src = file, alt = "kingston fury")},deleteFile = FALSE)
       } else if (RAM == "PNY 32GB (2x16GB) 3200MHz CL16 XLR8 RGB") {
         price <- 399
+        output$pny_32gb <- renderImage({
+          file <- "grafiki/RAM/pny_32gb.png"
+          list(src = file, alt = "pny")},deleteFile = FALSE)
       } else if (RAM == "GOODRAM 16GB (2x8GB) 3600MHz CL18 IRDM RGB") {
         price <- 249
         output$goodram <- renderImage({
-          file <- "grafiki/RAM/ram_przyklad.png"
+          file <- "grafiki/RAM/goodram.png"
           list(src = file, alt = "RAM")},deleteFile = FALSE)
       } else if (RAM == "Kingston FURY 64GB (2x32GB) 5600MHz CL40 Beast Black") {
         price <- 1100
+        output$kingston_fury <- renderImage({
+          file <- "grafiki/RAM/kingston_fury.png"
+          list(src = file, alt = "kingston fury")},deleteFile = FALSE)
       }
       add_to_cart(category, RAM, price, quantity)
     }
@@ -536,24 +594,28 @@ server <- function(input, output, session) {
       if (chłodzenie == "be quiet! Pure Loop 2 FX 360 3x120mm") {
         price <- 729
         output$bequiet_chlo <- renderImage({
-          file <- "grafiki/Chlodzenie/chlodzenie_przyklad.png"
-          list(src = file, alt = "Chlodzenie")},deleteFile = FALSE)
+          file <- "grafiki/Chlodzenie/bequiet_chlo.png"
+          list(src = file, alt = "bequiet")},deleteFile = FALSE)
       } else if (chłodzenie == "NZXT Kraken x53 2x120mm") {
         price <- 1139
+        output$nzxt_kraken <- renderImage({
+          file <- "grafiki/Chlodzenie/nzxt_kraken.png"
+          list(src = file, alt = "naxt")},deleteFile = FALSE)
       } else if (chłodzenie == "Corsair iCUE H150i ELITE 3x120mm") {
         price <- 1499
+        output$corsair_icue <- renderImage({
+          file <- "grafiki/Chlodzenie/corsair_icue.png"
+          list(src = file, alt = "corsair icue")},deleteFile = FALSE)
       } else if (chłodzenie == "SilentiumPC Fortis 5") {
         price <- 179
+        output$fortis5 <- renderImage({
+          file <- "grafiki/Chlodzenie/fortis5.png"
+          list(src = file, alt = "fortis 5")},deleteFile = FALSE)
       }
       add_to_cart(category, chłodzenie, price, quantity)
     }
     
   })
-  
-  # funkcja zapisująca dane do pliku tekstowego
-  write_data_to_file <- function(data, file_name) {
-    write.table(data, file = file_name, row.names = FALSE, sep = "\t")
-  }
   
   #Obserwator czyszczenia koszyka
   observeEvent(input$clear_button, {
@@ -575,17 +637,6 @@ server <- function(input, output, session) {
       colnames = c("Kategoria", "Produkt", "Cena", "Ilość"),
     )
   })
-  
-  # pobieranie tabeli jako pliku tekstowego
-  output$download_data <- downloadHandler(
-    filename = function() {
-      paste("dane", ".txt", sep = "")
-    },
-    content = function(file) {
-      write_data_to_file(output$cart_table, file)
-    }
-  )
-  
   
 }
 
