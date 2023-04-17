@@ -12,7 +12,7 @@ Twórcy projektu:
 
 Aplikacja którą nazwaliśmy **Kreator Komputera**, została stworzona z myślą o osobach które chcą dokonać zakupu komputera który może mieć różne zastosowania. Wyróżniająca funkcja naszej aplikacji to **Wizualizacja Komputera** która pozwala zobrazować użytkownikowi jak mniej więcej będzie wyglądał gotowy komputer. 
 
-Nasz program pozwala również na zbudowanie koszyka zawierającego wszystkie wybrane podzespoły, do koszyka można dodać dowolną ilość danego podzespołu a cena automatycznie się podliczy i wyświetli. Dla ułatwienia wyszukiwania części do realnego zakupu, wychodzimy naprzeciw, przycisk **Pobierz koszyk** pobierze cały koszyk do pliku *.txt* wraz z linkami do zakupu każdego podzespołu na stronie *www.xkom.pl*.
+Nasz program pozwala również na zbudowanie koszyka zawierającego wszystkie wybrane podzespoły, do koszyka można dodać dowolną ilość danego podzespołu a cena automatycznie się podliczy i wyświetli.
 
 Na samym dole aplikacji dostępna jest również interaktywna mapa wszystkich punktów x-kom w Polsce. Można się z niej dowiedzieć gdzie leży dany punkt na mapie i zobaczyć szczegółowy adres.
 
